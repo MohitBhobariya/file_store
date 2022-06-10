@@ -4,11 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.databinding.DataBindingUtil
 import com.example.file_store.databinding.ActivityMainBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -24,14 +21,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding:ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        //setContentView(R.layout.activity_main)
         binding= ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken("1083604959054-43th3co7arldu77mb1r6qb9jj57f6jc1.apps.googleusercontent.com")
             .requestEmail()
             .build()
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
         firebaseAuth= FirebaseAuth.getInstance()
+
+
 
         binding.googleSignInButton.setOnClickListener {
             val intent = mGoogleSignInClient.signInIntent
@@ -40,11 +40,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+    val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
         if (result.resultCode == Activity.RESULT_OK) {
 
-            //Toast.makeText(requireContext(),"Login Succesfull",Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext,"Login Succesfull",Toast.LENGTH_SHORT).show()
             // There are no request codes
             val data: Intent? = result.data
             val accountTask=GoogleSignIn.getSignedInAccountFromIntent(data)
@@ -61,12 +62,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun firebaseAuthWithGoogleAccount(account: GoogleSignInAccount) {
+    fun firebaseAuthWithGoogleAccount(account: GoogleSignInAccount) {
         val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
         firebaseAuth.signInWithCredential(credential)
             .addOnSuccessListener { authResult ->
 
-                // Sign in success, update UI with the signed-in user's information
+                // Sign in success, update UI with the signed-in User's information
                 val firebaseuser = firebaseAuth.currentUser
                 //val uid = firebaseuser!!.uid
                 val email = firebaseuser!!.email
@@ -75,30 +76,31 @@ class MainActivity : AppCompatActivity() {
 //                if (authResult.additionalUserInfo!!.isNewUser)
 //                {
 //                    val users=db.collection("USERS")
-//                    val user= hashMapOf(
+//                    val User= hashMapOf(
 //                        "Name" to name,
 //                        "Email" to email
 //                    )
-//                    users.document(email!!).set(user)
+//                    users.document(email!!).set(User)
 //                    Toast.makeText(
 //                        requireActivity(),
-//                        "New user logged in with $email",
+//                        "New User logged in with $email",
 //                        Toast.LENGTH_SHORT
 //                    ).show()
 //                }
                 Toast.makeText(applicationContext, "Login Successful", Toast.LENGTH_SHORT)
                     .show()
 
-                val intent=Intent(this,user::class.java)
-                intent.putExtra("Email",email)
+                val intent=Intent(this,User::class.java)
+                //intent.putExtra("Email",email)
                 startActivity(intent)
-               // dialog.dismissSignInDialog()
+                // dialog.dismissSignInDialog()
                 this.finish()
             }
             .addOnFailureListener {
                 Toast.makeText(applicationContext, "Login Failed", Toast.LENGTH_SHORT).show()
-               // dialog.dismissSignInDialog()
+                // dialog.dismissSignInDialog()
             }
 
     }
+
 }
