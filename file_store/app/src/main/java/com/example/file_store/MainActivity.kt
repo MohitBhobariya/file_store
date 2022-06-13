@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.file_store.databinding.ActivityMainBinding
@@ -19,13 +20,15 @@ class MainActivity : AppCompatActivity() {
     lateinit var mGoogleSignInClient: GoogleSignInClient
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var binding:ActivityMainBinding
+    private lateinit var dialog: Dialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_main)
         binding= ActivityMainBinding.inflate(layoutInflater)
+        dialog=Dialog(this)
         setContentView(binding.root)
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("1083604959054-43th3co7arldu77mb1r6qb9jj57f6jc1.apps.googleusercontent.com")
+            .requestIdToken("1088350226131-vjc1f4ves53hb2d24a993jv5kf6sbs5s.apps.googleusercontent.com")
             .requestEmail()
             .build()
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
@@ -44,7 +47,6 @@ class MainActivity : AppCompatActivity() {
     val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
         if (result.resultCode == Activity.RESULT_OK) {
-
             Toast.makeText(applicationContext,"Login Succesfull",Toast.LENGTH_SHORT).show()
             // There are no request codes
             val data: Intent? = result.data
@@ -94,7 +96,8 @@ class MainActivity : AppCompatActivity() {
                 //intent.putExtra("Email",email)
                 startActivity(intent)
                 // dialog.dismissSignInDialog()
-                this.finish()
+                Log.d("Success","Signin Sucessfull")
+                //this.finish()
             }
             .addOnFailureListener {
                 Toast.makeText(applicationContext, "Login Failed", Toast.LENGTH_SHORT).show()

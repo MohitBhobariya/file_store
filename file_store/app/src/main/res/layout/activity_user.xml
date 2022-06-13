@@ -7,16 +7,47 @@
     tools:context=".User">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/pdfBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="400dp"
+        android:layout_marginTop="200dp"
         android:background="#090909"
         android:backgroundTint="#121111"
-        android:text="Upload"
+        android:text="PDF"
         android:textColor="#F6F1F1"
         app:iconTint="#322929"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/docxBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="DOCX"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pdfBtn" />
+
+    <Button
+        android:id="@+id/musicBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="MUSIC"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/docxBtn" />
+
+    <Button
+        android:id="@+id/videoBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="VIDEO"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/musicBtn" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
