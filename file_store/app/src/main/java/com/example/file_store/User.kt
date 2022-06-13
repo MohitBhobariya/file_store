@@ -1,24 +1,19 @@
 package com.example.file_store
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.databinding.DataBindingUtil
-import androidx.viewbinding.ViewBinding
 import com.example.file_store.databinding.ActivityUserBinding
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.google.firebase.storage.UploadTask
-import com.google.firebase.storage.ktx.component1
-import com.google.firebase.storage.ktx.component2
-import com.google.firebase.storage.ktx.component3
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
 
 class User : AppCompatActivity() {
 
@@ -30,6 +25,7 @@ class User : AppCompatActivity() {
     lateinit var uri : Uri
     lateinit var mStorage : StorageReference
     private lateinit var dialog: Dialog
+    private lateinit var encrypt:Encryption
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -44,6 +40,7 @@ class User : AppCompatActivity() {
 
         mStorage = FirebaseStorage.getInstance().getReference("Uploads")
         dialog= Dialog(this)
+        encrypt=Encryption()
 
         pdfBtn.setOnClickListener{
                 val intent = Intent()
@@ -82,9 +79,22 @@ class User : AppCompatActivity() {
         if (resultCode == RESULT_OK) {
             if (requestCode == PDF) {
                 uri = data!!.data!!
+                try {
+                    val filedata = encrypt.readFile(uri.path!!)
+                    val secretkey = encrypt.generateSecretKey()
+                    val encodedata = encrypt.encrypt(secretkey!!, filedata)
+                    encrypt.saveFile(encodedata, uri.path!!)
+                }
+                catch (e:Exception)
+                {
+                    Toast.makeText(this,"Error while Encrypting",Toast.LENGTH_SHORT).show()
+                    Log.d("Encrypt Error","Error while Encrypting file")
+                }
+
            //     uriTxt.text = uri.toString()
                 upload ()
-            }else if (requestCode == DOCX) {
+            }
+            else if (requestCode == DOCX) {
                 uri = data!!.data!!
            //     uriTxt.text = uri.toString()
                 upload ()
@@ -117,4 +127,5 @@ class User : AppCompatActivity() {
         }
 
     }
+
    }
