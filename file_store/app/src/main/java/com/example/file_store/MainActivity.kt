@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
         if (result.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(applicationContext,"Login Succesfull",Toast.LENGTH_SHORT).show()
+         //   Toast.makeText(applicationContext,"Login Succesfull",Toast.LENGTH_SHORT).show()
             // There are no request codes
             val data: Intent? = result.data
             val accountTask=GoogleSignIn.getSignedInAccountFromIntent(data)

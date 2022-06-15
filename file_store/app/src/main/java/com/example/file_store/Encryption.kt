@@ -1,9 +1,14 @@
 package com.example.file_store
 
+import android.net.Uri
 import android.util.Base64.NO_WRAP
 import android.util.Base64.encodeToString
 import android.util.Log
+import androidx.core.net.toFile
 import java.io.*
+import java.net.URI
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.security.SecureRandom
 import java.util.*
 import javax.crypto.Cipher
@@ -28,8 +33,8 @@ class Encryption{
 //    }
 
     @Throws(Exception::class)
-    fun readFile(filePath: String): ByteArray {
-        val file = File(filePath)
+    fun readFile(uri:Uri): ByteArray {
+        val file = File(uri.path!!)
         val fileContents = file.readBytes()
         val inputBuffer = BufferedInputStream(
             FileInputStream(file)
@@ -39,6 +44,7 @@ class Encryption{
         inputBuffer.close()
 
         return fileContents
+
     }
 
     @Throws(Exception::class)
