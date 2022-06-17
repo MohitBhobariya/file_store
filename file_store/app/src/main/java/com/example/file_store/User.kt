@@ -72,6 +72,7 @@ class User : AppCompatActivity() {
         val musicBtn = findViewById<View>(R.id.musicBtn) as Button
         val videoBtn = findViewById<View>(R.id.videoBtn) as Button
         val decrypt = findViewById<View>(R.id.decrypt) as Button
+        val allfiles=findViewById<View>(R.id.all_files) as Button
 
         // binding= ActivityUserBinding.inflate(layoutInflater)
 
@@ -81,6 +82,11 @@ class User : AppCompatActivity() {
         decryptobj = Decryption()
 
        key()
+
+        allfiles.setOnClickListener{
+            val intent=Intent(this,ShowFiles::class.java)
+            startActivity(intent)
+        }
 
         decrypt.setOnClickListener {
             if (checkingPermission()) {
@@ -93,6 +99,7 @@ class User : AppCompatActivity() {
                 requestPermission()
             }
         }
+
 
         pdfBtn.setOnClickListener {
 
