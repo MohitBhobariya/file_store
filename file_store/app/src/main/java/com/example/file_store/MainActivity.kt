@@ -93,11 +93,11 @@ class MainActivity : AppCompatActivity() {
                     .show()
 
                 val intent=Intent(this,User::class.java)
-                //intent.putExtra("Email",email)
+                intent.putExtra("Email",email)
                 startActivity(intent)
                 // dialog.dismissSignInDialog()
                 Log.d("Success","Signin Sucessfull")
-                //this.finish()
+                this.finish()
             }
             .addOnFailureListener {
                 Toast.makeText(applicationContext, "Login Failed", Toast.LENGTH_SHORT).show()

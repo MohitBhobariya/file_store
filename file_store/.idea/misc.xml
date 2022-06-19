@@ -3,17 +3,22 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/drawable-xhdpi/border_styles.xml" value="0.2703125" />
+        <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/drawable-xhdpi/ic_baseline_person_24.xml" value="0.2703125" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/activity_main.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/activity_show_files.xml" value="0.20969202898550723" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/activity_user.xml" value="0.2" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/app_bar_user.xml" value="0.25181159420289856" />
+        <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/border_styles.xml" value="0.18840579710144928" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/content_user.xml" value="0.25181159420289856" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/elements.xml" value="0.20425724637681159" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/fragment_gallery.xml" value="0.25181159420289856" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/fragment_home.xml" value="0.25181159420289856" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/fragment_slideshow.xml" value="0.25181159420289856" />
+        <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/nav_header.xml" value="0.18840579710144928" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/nav_header_user.xml" value="0.25181159420289856" />
         <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/layout/simple_loading_spinner.xml" value="0.24365942028985507" />
+        <entry key="..\:/Users/JERRY/AndroidStudioProjects/file_store/app/src/main/res/menu/overflow_menu.xml" value="0.25416666666666665" />
       </map>
     </option>
   </component>

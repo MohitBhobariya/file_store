@@ -6,29 +6,45 @@ import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.os.PersistableBundle
 import android.provider.OpenableColumns
 import android.provider.Settings
+import android.telephony.mbms.FileInfo
 import android.util.Base64
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.view.accessibility.AccessibilityEventCompat.setAction
+import androidx.drawerlayout.widget.DrawerLayout
+import com.bumptech.glide.Glide
 import com.example.file_store.databinding.ActivityUserBinding
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
 import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.ktx.storageMetadata
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -44,7 +60,9 @@ class User : AppCompatActivity() {
 
     private lateinit var db: FirebaseFirestore
     private lateinit var firebaseAuth: FirebaseAuth
-
+    private lateinit var toogle: ActionBarDrawerToggle
+    private lateinit var sharedpref: SharedPreferences
+    lateinit var mGoogleSignInClient: GoogleSignInClient
 
     lateinit var binding: ActivityUserBinding
     val PDF: Int = 0
@@ -66,6 +84,40 @@ class User : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
+        setSupportActionBar(findViewById(R.id.action_bar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        sharedpref=this?.getPreferences(Context.MODE_PRIVATE)?:return
+        val isLogin=sharedpref.getString("Email","1")
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("1088350226131-vjc1f4ves53hb2d24a993jv5kf6sbs5s.apps.googleusercontent.com")
+            .requestEmail()
+            .build()
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+
+
+
+        if(isLogin=="1")
+        {
+            val sharedEmail=intent.getStringExtra("Email")
+
+            if(sharedEmail!=null)
+            {
+                with(sharedpref.edit())
+                {
+                    putString("Email", sharedEmail)
+                    apply()
+                }
+            }
+
+            else
+            {
+                val intent=Intent(this,MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        }
+
 
         val pdfBtn = findViewById<View>(R.id.pdfBtn) as Button
         val docxBtn = findViewById<View>(R.id.docxBtn) as Button
@@ -73,13 +125,53 @@ class User : AppCompatActivity() {
         val videoBtn = findViewById<View>(R.id.videoBtn) as Button
         val decrypt = findViewById<View>(R.id.decrypt) as Button
         val allfiles=findViewById<View>(R.id.all_files) as Button
-
-        // binding= ActivityUserBinding.inflate(layoutInflater)
+        val navView=findViewById<NavigationView>(R.id.nav_view_id)
+        val drawayerLayout=findViewById<DrawerLayout>(R.id.drawer_layout)
+        binding= ActivityUserBinding.inflate(layoutInflater)
 
         mStorage = FirebaseStorage.getInstance().getReference("Uploads")
         dialog = Dialog(this)
         encryptobj = Encryption()
         decryptobj = Decryption()
+        firebaseAuth = FirebaseAuth.getInstance()
+
+
+        val user=firebaseAuth.currentUser
+        //toogle= ActionBarDrawerToggle(this,drawayerLayout,R.string.open,R.string.close)
+        toogle= ActionBarDrawerToggle(this,drawayerLayout,findViewById(R.id.action_bar),R.string.open,R.string.close)
+        drawayerLayout.addDrawerListener(toogle)
+        toogle.isDrawerIndicatorEnabled=true
+        toogle.syncState()
+
+        supportActionBar?.setHomeButtonEnabled(true)
+        val headerView=navView.getHeaderView(0)
+        val userNameTextView=headerView.findViewById<TextView>(R.id.username)
+        val userEmailId=headerView.findViewById<TextView>(R.id.useremail)
+        val userImage=headerView.findViewById<CircleImageView>(R.id.userimage)
+
+        userNameTextView.text=user?.displayName.toString()
+        userEmailId.text=user?.email.toString()
+        Glide.with(this).load(user?.photoUrl).into(userImage)
+        navView.setNavigationItemSelectedListener {
+            when(it.itemId)
+            {
+                R.id.logout ->
+                {
+                    sharedpref.edit().remove("Email").apply()
+                    //  simpleDialog.simpleloading()
+                    val email = getIntent().extras?.getString("Email")
+                    mGoogleSignInClient.signOut()
+                    val intent=Intent(this,MainActivity::class.java)
+                    startActivity(intent)
+                    Toast.makeText(this,"LogOut",Toast.LENGTH_SHORT).show()
+                    // simpleDialog.dismissSimpleDialog()
+                    finish()
+                }
+            }
+            true
+        }
+
+
 
        key()
 
@@ -189,6 +281,7 @@ class User : AppCompatActivity() {
                 //      uriTxt.text = uri.toString()
                 // upload ()
             } else if (requestCode == decryption) {
+                
                 uri = data!!.data!!
                 val filedata = readFile(uri)
                 val decryptedata = decryptobj.decrypt(sk!!, filedata)
@@ -200,9 +293,16 @@ class User : AppCompatActivity() {
     }
 
     private fun upload(filename: String) {
-        var mReference = mStorage.child(filename)
+        val mReference = mStorage.child(filename)
+
+        val metdata= storageMetadata {
+            setCustomMetadata("Name",firebaseAuth.currentUser!!.displayName.toString())
+            setCustomMetadata("Email",firebaseAuth.currentUser!!.email)
+        }
+
+
         try {
-            mReference.putFile(uri).addOnSuccessListener {
+            mReference.putFile(uri,metdata).addOnSuccessListener {
 //                    taskSnapshot: UploadTask.TaskSnapshot? -> var url = taskSnapshot!!.downloadUrl
 //                val dwnTxt = findViewById<View>(R.id.dwnTxt) as TextView
 //                dwnTxt.text = url.toString()
@@ -314,7 +414,6 @@ class User : AppCompatActivity() {
 
     fun key(){
         db = FirebaseFirestore.getInstance()
-        firebaseAuth = FirebaseAuth.getInstance()
 
 
         val users = db.collection("USERS")
@@ -376,5 +475,24 @@ class User : AppCompatActivity() {
 
             return originalKey
         }
+
+
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        toogle.onConfigurationChanged(newConfig)
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        super.onPostCreate(savedInstanceState, persistentState)
+        toogle.syncState()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(toogle.onOptionsItemSelected(item))
+            return true
+        return super.onOptionsItemSelected(item)
+    }
+
 
     }

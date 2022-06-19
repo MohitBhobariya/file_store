@@ -10,11 +10,12 @@
         android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/d192305f298106cdf0e1e5c849c1ea20" />
+        app:srcCompat="@drawable/bright_blue_edge_by__ongliong11" />
 
     <TextView
         android:id="@+id/textView"

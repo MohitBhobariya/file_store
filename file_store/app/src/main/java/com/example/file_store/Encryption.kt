@@ -24,7 +24,7 @@ class Encryption{
     fun encrypt(yourKey: SecretKey, fileData: ByteArray): ByteArray {
         val data = yourKey.getEncoded()
         val skeySpec = SecretKeySpec(data, 0, data.size, "AES")
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        val cipher = Cipher.getInstance("AES", "BC")
         cipher.init(Cipher.ENCRYPT_MODE, skeySpec, IvParameterSpec(ByteArray(cipher.getBlockSize())))
         return cipher.doFinal(fileData)
     }

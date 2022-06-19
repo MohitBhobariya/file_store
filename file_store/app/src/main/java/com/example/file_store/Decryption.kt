@@ -10,7 +10,7 @@ class Decryption {
     @Throws(Exception::class)
     fun decrypt(yourKey: SecretKey, fileData: ByteArray): ByteArray {
         val decrypted: ByteArray
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        val cipher = Cipher.getInstance("AES", "BC")
         cipher.init(Cipher.DECRYPT_MODE, yourKey, IvParameterSpec(ByteArray(cipher.blockSize)))
         decrypted = cipher.doFinal(fileData)
         return decrypted
