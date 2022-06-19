@@ -1,40 +1,41 @@
 package com.example.file_store
 
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment.DIRECTORY_DOWNLOADS
+import android.os.Environment
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 
-
-class Adapter(val showFiles: ShowFiles, val dataModel: ArrayList<DataModel>) :
+class UserFilesAdapter(val userFiles: UserFiles, val dataModel: ArrayList<DataModel>) :
     RecyclerView.Adapter<MyViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val layoutInflater:LayoutInflater= LayoutInflater.from(showFiles.baseContext)
-        val view:View = layoutInflater.inflate(R.layout.elements,null,false)
+        val layoutInflater: LayoutInflater = LayoutInflater.from(userFiles.baseContext)
+        val view: View = layoutInflater.inflate(R.layout.elements,null,false)
         return MyViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.filename.setText(dataModel.get(position).getName())
         holder.download.setOnClickListener{
-            downloadFile(holder.filename.context,dataModel.get(position).getName(),".pdf",DIRECTORY_DOWNLOADS,dataModel.get(position).getUrl())
+            downloadFile(holder.filename.context,dataModel.get(position).getName(),".pdf",
+                Environment.DIRECTORY_DOWNLOADS,dataModel.get(position).getUrl())
         }
+
         holder.ownerinfo.setOnClickListener{
-            val intent=Intent(holder.filename.context,OwnerInfo::class.java)
-            val extra=Bundle()
+            val intent= Intent(holder.filename.context,OwnerInfo::class.java)
+            val extra= Bundle()
             extra.putString("FileName",dataModel.get(position).getName())
             extra.putString("OwnerName",dataModel.get(position).getOwnerName())
             extra.putString("OwnerEmail",dataModel.get(position).getOwnerEmail())
-            extra.putString("BackActivity","ShowFiles")
+            extra.putString("BackActivity","UserFiles")
             intent.putExtras(extra)
             holder.filename.context.startActivity(intent)
         }

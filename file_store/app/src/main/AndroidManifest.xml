@@ -16,13 +16,22 @@
 
     <application
         android:allowBackup="false"
+        android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:fullBackupContent="false"
         android:supportsRtl="true"
         android:theme="@style/Theme.NoTheme">
+        <activity
+            android:name=".OwnerInfo"
+            android:exported="false" />
+        <activity
+            android:name=".UploadFiles"
+            android:exported="false" />
+        <activity
+            android:name=".UserFiles"
+            android:exported="false" />
         <activity
             android:name=".ShowFiles"
             android:exported="false" />
