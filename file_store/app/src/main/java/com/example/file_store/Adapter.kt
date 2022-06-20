@@ -36,6 +36,7 @@ class Adapter(val showFiles: ShowFiles, val dataModel: ArrayList<DataModel>) :
             extra.putString("OwnerEmail",dataModel.get(position).getOwnerEmail())
             extra.putString("BackActivity","ShowFiles")
             intent.putExtras(extra)
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
             holder.filename.context.startActivity(intent)
         }
     }

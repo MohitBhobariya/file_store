@@ -3,7 +3,6 @@ package com.example.file_store
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -16,42 +15,29 @@ import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.file_store.databinding.ActivityUserBinding
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
-import com.google.firebase.storage.ktx.storageMetadata
+import androidx.core.view.isVisible
+import org.w3c.dom.Text
 import java.io.ByteArrayInputStream
-import java.security.SecureRandom
-import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
-class UploadFiles : AppCompatActivity() {
-
-    private lateinit var db: FirebaseFirestore
-    private lateinit var firebaseAuth: FirebaseAuth
+class DecryptFiles : AppCompatActivity() {
 
     val PDF: Int = 0
     val DOCX: Int = 1
     val AUDIO: Int = 2
     val VIDEO: Int = 3
-    val decryption: Int = 4
     var sk: SecretKey? = null
-    lateinit var uri: Uri
-    lateinit var mStorage: StorageReference
-    lateinit var user_folder: StorageReference
+    var uri: Uri? =null
     private lateinit var dialog: Dialog
-    private lateinit var encryptobj: Encryption
     private lateinit var decryptobj: Decryption
-    private lateinit var user_email:String
+    private lateinit var fileToBeDecrypted:TextView
     val permissions = arrayOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -59,26 +45,33 @@ class UploadFiles : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_upload_files)
+        setContentView(R.layout.activity_decrypt_files)
 
-        val pdfBtn = findViewById<View>(R.id.pdfBtn) as Button
-        val docxBtn = findViewById<View>(R.id.docxBtn) as Button
-        val musicBtn = findViewById<View>(R.id.audioBtn) as Button
-        val videoBtn = findViewById<View>(R.id.videoBtn) as Button
-
-        firebaseAuth = FirebaseAuth.getInstance()
-        mStorage = FirebaseStorage.getInstance().getReference("Uploads")
-        user_email= firebaseAuth.currentUser!!.email.toString()
-        user_folder=FirebaseStorage.getInstance().getReference(user_email)
-
-
+        val pdfBtn = findViewById<View>(R.id.pdfBt) as Button
+        val docxBtn = findViewById<View>(R.id.docxBt) as Button
+        val musicBtn = findViewById<View>(R.id.audioBt) as Button
+        val videoBtn = findViewById<View>(R.id.videoBt) as Button
+        val startDecryption = findViewById<View>(R.id.start_decryption) as Button
+        val done = findViewById<View>(R.id.done_button) as Button
+        val decryption_key=findViewById<EditText>(R.id.decryption_key)
+        fileToBeDecrypted=findViewById<TextView>(R.id.file_to_be_decrypted)
         dialog = Dialog(this)
-        encryptobj = Encryption()
         decryptobj = Decryption()
 
+        done.setOnClickListener{
+            val enteredString=decryption_key.text.toString()
+            if(enteredString.length > 0) {
+                sk = string_to_sk(enteredString)
+                pdfBtn.isVisible=true
+                docxBtn.isVisible=true
+                musicBtn.isVisible=true
+                videoBtn.isVisible=true
+                startDecryption.isVisible=true
 
-        key()
-
+            }
+            else
+                Toast.makeText(this,"Enter Decryption Key",Toast.LENGTH_SHORT).show()
+        }
 
         pdfBtn.setOnClickListener {
             if (checkingPermission()) {
@@ -132,6 +125,21 @@ class UploadFiles : AppCompatActivity() {
                 requestPermission()
             }
         }
+
+        startDecryption.setOnClickListener {
+            if (uri != null) {
+                try {
+                    val filedata = readFile(uri!!)
+                    val decryptedata = decryptobj.decrypt(sk!!, filedata)
+                    saveFile(decryptedata, uri!!)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Error while Decrypting", Toast.LENGTH_SHORT).show()
+                    Log.d("Encrypt Error", "Error while Encrypting file")
+                }
+            } else {
+                Toast.makeText(this, "Please Select File", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -139,72 +147,26 @@ class UploadFiles : AppCompatActivity() {
         // dialog.simpleloading()
 
         if (resultCode == Activity.RESULT_OK) {
-                uri = data!!.data!!
-                var filename: String? = null
-                data.data.let { returnUri ->
-                    contentResolver.query(returnUri!!, null, null, null, null)
-                }?.use { cursor ->
-                    /*
-                     * Get the column indexes of the data in the Cursor,
-                     * move to the first row in the Cursor, get the data,
-                     * and display it.
-                     */
-                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-                    cursor.moveToFirst()
-                    filename = cursor.getString(nameIndex)
-                }
+            uri = data!!.data!!
 
-                upload_to_user_folder(filename)
-
-                try {
-                    val filedata = readFile(uri)
-                    val encodedata = encryptobj.encrypt(sk!!, filedata)
-                    saveFile(encodedata, uri)
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Error while Encrypting", Toast.LENGTH_SHORT).show()
-                    Log.d("Encrypt Error", "Error while Encrypting file")
-                }
-
-                upload(filename!!)
+            var filename: String? = null
+            data.data.let { returnUri ->
+                contentResolver.query(returnUri!!, null, null, null, null)
+            }?.use { cursor ->
+                /*
+                 * Get the column indexes of the data in the Cursor,
+                 * move to the first row in the Cursor, get the data,
+                 * and display it.
+                 */
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                cursor.moveToFirst()
+                filename = cursor.getString(nameIndex)
+            }
+            fileToBeDecrypted.text=filename.toString()
 
         }
         super.onActivityResult(requestCode, resultCode, data)
-    }
-
-    private fun upload_to_user_folder(filename: String?) {
-        val mReference = user_folder.child(filename!!)
-        val metdata= storageMetadata {
-            setCustomMetadata("Name",firebaseAuth.currentUser!!.displayName.toString())
-            setCustomMetadata("Email",firebaseAuth.currentUser!!.email)
-        }
-
-        try {
-            mReference.putFile(uri,metdata).addOnSuccessListener {
-                Toast.makeText(this, "Successfully Uploaded to User Folder", Toast.LENGTH_LONG).show()
-                // dialog.dismissSimpleDialog()
-            }
-        } catch (e: Exception) {
-            Toast.makeText(this,"Error while uploading to database", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun upload(filename: String) {
-        val mReference = mStorage.child(filename)
-        val metdata= storageMetadata {
-            setCustomMetadata("Name",firebaseAuth.currentUser!!.displayName.toString())
-            setCustomMetadata("Email",firebaseAuth.currentUser!!.email)
-        }
-
-        try {
-            mReference.putFile(uri,metdata).addOnSuccessListener {
-                Toast.makeText(this, "Successfully Uploaded", Toast.LENGTH_LONG).show()
-                // dialog.dismissSimpleDialog()
-            }
-        } catch (e: Exception) {
-            Toast.makeText(this,"Error while uploading to database", Toast.LENGTH_LONG).show()
-        }
-
     }
 
     fun checkingPermission(): Boolean {
@@ -305,64 +267,6 @@ class UploadFiles : AppCompatActivity() {
         }
         fos!!.close()
     }
-
-    fun key(){
-        db = FirebaseFirestore.getInstance()
-
-        val users = db.collection("USERS")
-        val firebaseuser = firebaseAuth.currentUser
-        val email = firebaseuser!!.email
-        val name = firebaseuser.displayName.toString()
-
-        val docref = db.collection("USERS").document(email!!)
-        docref.get().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val document = task.result
-                if (document != null) {
-                    if (document.exists()) {
-                        val sk_in_string = document["SecretKey"].toString()
-                        sk=string_to_sk(sk_in_string)
-                        Log.d("TAG", "Document already exists.")
-                        Toast.makeText(this,"Key already exist",Toast.LENGTH_SHORT).show()
-                    }
-
-                    else {
-                        sk = generateSecretKey()
-                        val sktostring=sk_to_string(sk!!)
-                        val user = hashMapOf(
-                            "Name" to name,
-                            "Email" to email,
-                            "SecretKey" to sktostring
-                        )
-                        users.document(email).set(user)
-
-                        Log.d("TAG", "Document inserted.")
-                        Toast.makeText(this,"Key inserted",Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } else {
-                Log.d("TAG", "Error: ", task.exception)
-            }
-        }
-
-    }
-
-
-    @Throws(Exception::class)
-    fun generateSecretKey(): SecretKey? {
-        val secureRandom = SecureRandom()
-        val keyGenerator = KeyGenerator.getInstance("AES")
-        //generate a key with secure random
-        keyGenerator?.init(128, secureRandom)
-        return keyGenerator?.generateKey()
-    }
-
-
-    fun sk_to_string(secretKey: SecretKey): String {
-        val encodedKey = Base64.encodeToString(secretKey.encoded, Base64.NO_WRAP)
-        return encodedKey
-    }
-
 
     fun string_to_sk(secretKey: String): SecretKey {
         val decodedKey = Base64.decode(secretKey, Base64.NO_WRAP)

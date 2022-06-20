@@ -121,6 +121,7 @@ class User : AppCompatActivity() {
         val upload_files = findViewById<View>(R.id.upload_files) as Button
         val download_files=findViewById<View>(R.id.download_files) as Button
         val user_files=findViewById<View>(R.id.user_files)
+        val decrytfiles=findViewById<View>(R.id.decryptionBtn) as Button
 
 
         val navView=findViewById<NavigationView>(R.id.nav_view_id)
@@ -176,6 +177,15 @@ class User : AppCompatActivity() {
         }
         user_files.setOnClickListener{
             val intent=Intent(this,UserFiles::class.java)
+            startActivity(intent)
+        }
+        download_files.setOnClickListener{
+            val intent=Intent(this,ShowFiles::class.java)
+            startActivity(intent)
+        }
+
+        decrytfiles.setOnClickListener{
+            val intent=Intent(this,DecryptFiles::class.java)
             startActivity(intent)
         }
 

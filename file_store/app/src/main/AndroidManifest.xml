@@ -24,6 +24,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NoTheme">
         <activity
+            android:name=".DecryptFiles"
+            android:exported="false" />
+        <activity
             android:name=".OwnerInfo"
             android:exported="false" />
         <activity
