@@ -65,13 +65,6 @@ class User : AppCompatActivity() {
     lateinit var mGoogleSignInClient: GoogleSignInClient
 
     lateinit var binding: ActivityUserBinding
-    val PDF: Int = 0
-    val DOCX: Int = 1
-    val AUDIO: Int = 2
-    val VIDEO: Int = 3
-    val decryption: Int = 4
-    var sk: SecretKey? = null
-    lateinit var uri: Uri
     lateinit var mStorage: StorageReference
     private lateinit var dialog: Dialog
     private lateinit var encryptobj: Encryption
@@ -122,7 +115,8 @@ class User : AppCompatActivity() {
         val download_files=findViewById<View>(R.id.download_files) as Button
         val user_files=findViewById<View>(R.id.user_files)
         val decrytfiles=findViewById<View>(R.id.decryptionBtn) as Button
-
+        val decryptownfiles=findViewById<View>(R.id.decrypt_your_files) as Button
+        val see_secret_key=findViewById<View>(R.id.see_secret_key) as Button
 
         val navView=findViewById<NavigationView>(R.id.nav_view_id)
         val drawayerLayout=findViewById<DrawerLayout>(R.id.drawer_layout)
@@ -157,13 +151,13 @@ class User : AppCompatActivity() {
                 R.id.logout ->
                 {
                     sharedpref.edit().remove("Email").apply()
-                    //  simpleDialog.simpleloading()
+                    dialog.simpleloading()
                     val email = getIntent().extras?.getString("Email")
                     mGoogleSignInClient.signOut()
                     val intent=Intent(this,MainActivity::class.java)
                     startActivity(intent)
                     Toast.makeText(this,"LogOut",Toast.LENGTH_SHORT).show()
-                    // simpleDialog.dismissSimpleDialog()
+                    dialog.dismissSimpleDialog()
                     finish()
                 }
             }
@@ -189,6 +183,15 @@ class User : AppCompatActivity() {
             startActivity(intent)
         }
 
+        see_secret_key.setOnClickListener {
+            val intent=Intent(this,SeeSecretKey::class.java)
+            startActivity(intent)
+        }
+
+       decryptownfiles.setOnClickListener{
+           val intent=Intent(this,DecryptOwnFiles::class.java)
+           startActivity(intent)
+       }
 
 
 

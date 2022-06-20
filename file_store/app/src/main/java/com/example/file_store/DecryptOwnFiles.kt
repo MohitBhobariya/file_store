@@ -22,13 +22,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import org.w3c.dom.Text
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayInputStream
+import java.security.SecureRandom
+import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
-class DecryptFiles : AppCompatActivity() {
-
+class DecryptOwnFiles : AppCompatActivity() {
     val PDF: Int = 0
     val DOCX: Int = 1
     val AUDIO: Int = 2
@@ -37,7 +40,8 @@ class DecryptFiles : AppCompatActivity() {
     var uri: Uri? =null
     private lateinit var dialog: Dialog
     private lateinit var decryptobj: Decryption
-    private lateinit var fileToBeDecrypted:TextView
+    private lateinit var db: FirebaseFirestore
+    private lateinit var firebaseAuth: FirebaseAuth
     val permissions = arrayOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -45,35 +49,20 @@ class DecryptFiles : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_decrypt_files)
+        setContentView(R.layout.activity_decrypt_own_files)
 
-        val pdfBtn = findViewById<View>(R.id.pdfBt) as Button
-        val docxBtn = findViewById<View>(R.id.docxBt) as Button
-        val musicBtn = findViewById<View>(R.id.audioBt) as Button
-        val videoBtn = findViewById<View>(R.id.videoBt) as Button
-        val startDecryption = findViewById<View>(R.id.start_decryption) as Button
-        val done = findViewById<View>(R.id.done_button) as Button
-        val decryption_key=findViewById<EditText>(R.id.decryption_key)
-        fileToBeDecrypted=findViewById<TextView>(R.id.file_to_be_decrypted)
+        val pdfBtn = findViewById<View>(R.id.pdfBtnn) as Button
+        val docxBtn = findViewById<View>(R.id.docxBtnn) as Button
+        val musicBtn = findViewById<View>(R.id.audioBtnn) as Button
+        val videoBtn = findViewById<View>(R.id.videoBtnn) as Button
         dialog = Dialog(this)
         decryptobj = Decryption()
+        firebaseAuth = FirebaseAuth.getInstance()
 
-        done.setOnClickListener{
-            val enteredString=decryption_key.text.toString()
-            if(enteredString.length > 0) {
-                sk = string_to_sk(enteredString)
-                pdfBtn.isVisible=true
-                docxBtn.isVisible=true
-                musicBtn.isVisible=true
-                videoBtn.isVisible=true
-                startDecryption.isVisible=true
 
-            }
-            else
-                Toast.makeText(this,"Enter Decryption Key",Toast.LENGTH_SHORT).show()
-        }
+        key()
 
-        pdfBtn.setOnClickListener {
+        pdfBtn.setOnClickListener{
             if (checkingPermission()) {
                 Toast.makeText(this, "Select PDF", Toast.LENGTH_SHORT).show()
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -126,49 +115,25 @@ class DecryptFiles : AppCompatActivity() {
             }
         }
 
-        startDecryption.setOnClickListener {
-            if (uri != null) {
-                try {
-                    dialog.simpleloading()
-                    val filedata = readFile(uri!!)
-                    val decryptedata = decryptobj.decrypt(sk!!, filedata)
-                    saveFile(decryptedata, uri!!)
-                    dialog.dismissSimpleDialog()
-                    Toast.makeText(this, "File Decrypted Successfully", Toast.LENGTH_SHORT).show()
-                }
-                catch (e: Exception) {
-                    dialog.dismissSimpleDialog()
-                    Toast.makeText(this, "Error while Decrypting", Toast.LENGTH_SHORT).show()
-                    Log.d("Encrypt Error", "Error while Encrypting file")
-                }
-            } else {
-                Toast.makeText(this, "Please Select File", Toast.LENGTH_LONG).show()
-            }
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-        // dialog.simpleloading()
-
         if (resultCode == Activity.RESULT_OK) {
             uri = data!!.data!!
-
-            var filename: String? = null
-            data.data.let { returnUri ->
-                contentResolver.query(returnUri!!, null, null, null, null)
-            }?.use { cursor ->
-                /*
-                 * Get the column indexes of the data in the Cursor,
-                 * move to the first row in the Cursor, get the data,
-                 * and display it.
-                 */
-                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
-                cursor.moveToFirst()
-                filename = cursor.getString(nameIndex)
+            try {
+                dialog.simpleloading()
+                val filedata = readFile(uri!!)
+                val decryptedata = decryptobj.decrypt(sk!!, filedata)
+                saveFile(decryptedata, uri!!)
+                dialog.dismissSimpleDialog()
+                Toast.makeText(this, "File Decrypted Successfully", Toast.LENGTH_SHORT).show()
             }
-            fileToBeDecrypted.text=filename.toString()
+            catch (e: Exception) {
+                dialog.dismissSimpleDialog()
+                Toast.makeText(this, "Error while Decrypting", Toast.LENGTH_SHORT).show()
+                Log.d("Encrypt Error", "Error while Encrypting file")
+            }
 
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -273,10 +238,74 @@ class DecryptFiles : AppCompatActivity() {
         fos!!.close()
     }
 
+    @Throws(Exception::class)
+    fun generateSecretKey(): SecretKey? {
+        val secureRandom = SecureRandom()
+        val keyGenerator = KeyGenerator.getInstance("AES")
+        //generate a key with secure random
+        keyGenerator?.init(128, secureRandom)
+        return keyGenerator?.generateKey()
+    }
+
+
+    fun sk_to_string(secretKey: SecretKey): String {
+        val encodedKey = Base64.encodeToString(secretKey.encoded, Base64.NO_WRAP)
+        return encodedKey
+    }
+
+
     fun string_to_sk(secretKey: String): SecretKey {
         val decodedKey = Base64.decode(secretKey, Base64.NO_WRAP)
         val originalKey = SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
 
         return originalKey
+    }
+
+    fun key(){
+        dialog.simpleloading()
+
+
+        db = FirebaseFirestore.getInstance()
+
+        val users = db.collection("USERS")
+        val firebaseuser = firebaseAuth.currentUser
+        val email = firebaseuser!!.email
+        val name = firebaseuser.displayName.toString()
+
+        val docref = db.collection("USERS").document(email!!)
+        docref.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val document = task.result
+                if (document != null) {
+                    if (document.exists()) {
+                        val sk_in_string = document["SecretKey"].toString()
+                        sk=string_to_sk(sk_in_string)
+                        Log.d("TAG", "Document already exists.")
+                        dialog.dismissSimpleDialog()
+                        Toast.makeText(this,"Key already exist",Toast.LENGTH_SHORT).show()
+                    }
+
+                    else {
+                        sk = generateSecretKey()
+                        val sktostring=sk_to_string(sk!!)
+                        val user = hashMapOf(
+                            "Name" to name,
+                            "Email" to email,
+                            "SecretKey" to sktostring
+                        )
+                        users.document(email).set(user)
+
+                        Log.d("TAG", "Document inserted.")
+                        dialog.dismissSimpleDialog()
+                        Toast.makeText(this,"Key inserted",Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                dialog.dismissSimpleDialog()
+                Log.d("TAG", "Error: ", task.exception)
+                Toast.makeText(this,"Error while genrating key",Toast.LENGTH_SHORT).show()
+            }
+        }
+
     }
 }

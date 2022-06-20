@@ -43,7 +43,6 @@ class UploadFiles : AppCompatActivity() {
     val DOCX: Int = 1
     val AUDIO: Int = 2
     val VIDEO: Int = 3
-    val decryption: Int = 4
     var sk: SecretKey? = null
     lateinit var uri: Uri
     lateinit var mStorage: StorageReference
@@ -136,9 +135,10 @@ class UploadFiles : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-        // dialog.simpleloading()
-
         if (resultCode == Activity.RESULT_OK) {
+
+            dialog.simpleloading()
+
                 uri = data!!.data!!
                 var filename: String? = null
                 data.data.let { returnUri ->
@@ -161,12 +161,12 @@ class UploadFiles : AppCompatActivity() {
                     val filedata = readFile(uri)
                     val encodedata = encryptobj.encrypt(sk!!, filedata)
                     saveFile(encodedata, uri)
+                    upload(filename!!)
                 } catch (e: Exception) {
+                    dialog.dismissSimpleDialog()
                     Toast.makeText(this, "Error while Encrypting", Toast.LENGTH_SHORT).show()
                     Log.d("Encrypt Error", "Error while Encrypting file")
                 }
-
-                upload(filename!!)
 
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -185,6 +185,7 @@ class UploadFiles : AppCompatActivity() {
                 // dialog.dismissSimpleDialog()
             }
         } catch (e: Exception) {
+            dialog.dismissSimpleDialog()
             Toast.makeText(this,"Error while uploading to database", Toast.LENGTH_LONG).show()
         }
     }
@@ -199,9 +200,10 @@ class UploadFiles : AppCompatActivity() {
         try {
             mReference.putFile(uri,metdata).addOnSuccessListener {
                 Toast.makeText(this, "Successfully Uploaded", Toast.LENGTH_LONG).show()
-                // dialog.dismissSimpleDialog()
+                dialog.dismissSimpleDialog()
             }
         } catch (e: Exception) {
+            dialog.dismissSimpleDialog()
             Toast.makeText(this,"Error while uploading to database", Toast.LENGTH_LONG).show()
         }
 
@@ -225,7 +227,6 @@ class UploadFiles : AppCompatActivity() {
 
 
     fun requestPermission() {
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             try {
                 val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
@@ -307,6 +308,9 @@ class UploadFiles : AppCompatActivity() {
     }
 
     fun key(){
+        dialog.simpleloading()
+
+
         db = FirebaseFirestore.getInstance()
 
         val users = db.collection("USERS")
@@ -323,6 +327,7 @@ class UploadFiles : AppCompatActivity() {
                         val sk_in_string = document["SecretKey"].toString()
                         sk=string_to_sk(sk_in_string)
                         Log.d("TAG", "Document already exists.")
+                        dialog.dismissSimpleDialog()
                         Toast.makeText(this,"Key already exist",Toast.LENGTH_SHORT).show()
                     }
 
@@ -337,11 +342,14 @@ class UploadFiles : AppCompatActivity() {
                         users.document(email).set(user)
 
                         Log.d("TAG", "Document inserted.")
+                        dialog.dismissSimpleDialog()
                         Toast.makeText(this,"Key inserted",Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
+                dialog.dismissSimpleDialog()
                 Log.d("TAG", "Error: ", task.exception)
+                Toast.makeText(this,"Error while genrating key",Toast.LENGTH_SHORT).show()
             }
         }
 

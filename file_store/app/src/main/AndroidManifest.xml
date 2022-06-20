@@ -24,6 +24,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NoTheme">
         <activity
+            android:name=".SeeSecretKey"
+            android:exported="false" />
+        <activity
+            android:name=".DecryptOwnFiles"
+            android:exported="false" />
+        <activity
             android:name=".DecryptFiles"
             android:exported="false" />
         <activity

@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         if (result.resultCode == Activity.RESULT_OK) {
          //   Toast.makeText(applicationContext,"Login Succesfull",Toast.LENGTH_SHORT).show()
             // There are no request codes
+            dialog.simpleloading()
             val data: Intent? = result.data
             val accountTask=GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
@@ -95,13 +96,13 @@ class MainActivity : AppCompatActivity() {
                 val intent=Intent(this,User::class.java)
                 intent.putExtra("Email",email)
                 startActivity(intent)
-                // dialog.dismissSignInDialog()
+                dialog.dismissSimpleDialog()
                 Log.d("Success","Signin Sucessfull")
                 this.finish()
             }
             .addOnFailureListener {
                 Toast.makeText(applicationContext, "Login Failed", Toast.LENGTH_SHORT).show()
-                // dialog.dismissSignInDialog()
+                dialog.dismissSimpleDialog()
             }
 
     }

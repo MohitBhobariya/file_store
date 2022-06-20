@@ -19,6 +19,7 @@ class ShowFiles : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private var dataModel=ArrayList<DataModel>()
     private lateinit var adapter: Adapter
+    private lateinit var dialog: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +28,10 @@ class ShowFiles : AppCompatActivity() {
         recyclerView=findViewById(R.id.recyclerivew)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager=LinearLayoutManager(this)
+        dialog= Dialog(this)
+
+        dialog.simpleloading()
+
 
         if(dataModel.size>0)
             dataModel.clear()
@@ -63,5 +68,7 @@ class ShowFiles : AppCompatActivity() {
             .addOnFailureListener{
                 Toast.makeText(this,"Failed while fetching data",Toast.LENGTH_SHORT).show()
             }
+
+        dialog.dismissSimpleDialog()
     }
 }

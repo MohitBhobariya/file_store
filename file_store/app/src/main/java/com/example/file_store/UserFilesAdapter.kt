@@ -37,6 +37,7 @@ class UserFilesAdapter(val userFiles: UserFiles, val dataModel: ArrayList<DataMo
             extra.putString("OwnerEmail",dataModel.get(position).getOwnerEmail())
             extra.putString("BackActivity","UserFiles")
             intent.putExtras(extra)
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
             holder.filename.context.startActivity(intent)
         }
     }

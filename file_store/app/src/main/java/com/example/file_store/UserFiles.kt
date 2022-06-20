@@ -16,6 +16,7 @@ class UserFiles : AppCompatActivity() {
     private var dataModel=ArrayList<DataModel>()
     private lateinit var adapter: UserFilesAdapter
     private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var dialog: Dialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_files)
@@ -25,10 +26,15 @@ class UserFiles : AppCompatActivity() {
         recyclerView=findViewById(R.id.user_recycler_view)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager= LinearLayoutManager(this)
+        dialog= Dialog(this)
+
+        dialog.simpleloading()
+
 
         if(dataModel.size>0)
             dataModel.clear()
         storage.listAll().addOnSuccessListener { listResult ->
+
             listResult.items.forEach{ item ->
                 val itemName=item.name
                 var itemOwnerName:String?=null
@@ -59,6 +65,6 @@ class UserFiles : AppCompatActivity() {
             .addOnFailureListener{
                 Toast.makeText(this,"Failed while fetching data", Toast.LENGTH_SHORT).show()
             }
-
+        dialog.dismissSimpleDialog()
     }
     }
