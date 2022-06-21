@@ -60,7 +60,7 @@ class DecryptFiles : AppCompatActivity() {
 
         done.setOnClickListener{
             val enteredString=decryption_key.text.toString()
-            if(enteredString.length > 0) {
+            if(enteredString.length > 1) {
                 sk = string_to_sk(enteredString)
                 pdfBtn.isVisible=true
                 docxBtn.isVisible=true
