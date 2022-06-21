@@ -37,27 +37,30 @@ class UserFiles : AppCompatActivity() {
 
             listResult.items.forEach{ item ->
                 val itemName=item.name
-                var itemOwnerName:String?=null
-                var itemOwnerEmail:String?=null
-                item.metadata.addOnSuccessListener {
-                    itemOwnerName=it.getCustomMetadata("Name").toString()
-                    itemOwnerEmail=it.getCustomMetadata("Email").toString()
-                }
-                var itemUrl:String
-                Log.d("NAME_OF_FILE","Name IS $itemName")
-                item.downloadUrl.addOnSuccessListener{
-                    itemUrl=it.toString()
-                    val dataitem=DataModel(itemName, itemUrl,itemOwnerName!!,itemOwnerEmail!!)
-                    dataModel.add(dataitem)
-                    adapter.notifyDataSetChanged()
-                    Log.d("URL_OF_FILE","URL IS $itemUrl")
-                }
-                    .addOnFailureListener{
-                        Toast.makeText(this,"Failed to fetch url", Toast.LENGTH_SHORT).show()
+                var itemOwnerName:String
+                var itemOwnerEmail:String
+                var itemUrl: String
+                Log.d("NAME_OF_FILE", "Name IS $itemName")
+
+                item.downloadUrl.addOnSuccessListener {
+                    itemUrl = it.toString()
+
+                    item.metadata.addOnSuccessListener {
+                        itemOwnerName = it.getCustomMetadata("Name").toString()
+                        itemOwnerEmail = it.getCustomMetadata("Email").toString()
+                        val dataitem=DataModel(itemName, itemUrl,itemOwnerName,itemOwnerEmail)
+                        dataModel.add(dataitem)
+                        adapter.notifyDataSetChanged()
+                        Log.d("NAME_OF_Owner", "Owner Name is $itemOwnerName")
+                        Log.d("Email_OF_Owner", "Owner Email is $itemOwnerEmail")
                     }
 
+                    Log.d("URL_OF_FILE", "URL IS $itemUrl")
+                }
+                    .addOnFailureListener {
+                        // Toast.makeText(this, "Failed to fetch url", Toast.LENGTH_SHORT).show()
+                    }
             }
-
             adapter=UserFilesAdapter(this,dataModel)
             recyclerView.adapter=adapter
 

@@ -9,8 +9,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.util.Log
+import android.widget.Toast
 
 
 class Adapter(val showFiles: ShowFiles, val dataModel: ArrayList<DataModel>) :
@@ -54,14 +56,10 @@ class Adapter(val showFiles: ShowFiles, val dataModel: ArrayList<DataModel>) :
         Log.d("URI","$uri")
         val request = DownloadManager.Request(uri)
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalFilesDir(
-            context,
-            destinationDirectory,
-            fileName + fileExtension
-        )
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS.toString(),fileName)
         downloadmanager.enqueue(request)
+        Toast.makeText(context,"Downloading File",Toast.LENGTH_SHORT).show()
     }
-
     override fun getItemCount(): Int {
         return dataModel.size
     }

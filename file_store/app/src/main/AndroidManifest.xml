@@ -25,33 +25,51 @@
         android:theme="@style/Theme.NoTheme">
         <activity
             android:name=".SeeSecretKey"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoAction"
             android:exported="false" />
         <activity
             android:name=".DecryptOwnFiles"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoAction"
             android:exported="false" />
         <activity
             android:name=".DecryptFiles"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoAction"
             android:exported="false" />
         <activity
             android:name=".OwnerInfo"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoAction"
             android:exported="false" />
         <activity
             android:name=".UploadFiles"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoAction"
             android:exported="false" />
         <activity
             android:name=".UserFiles"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoAction"
             android:exported="false" />
         <activity
             android:name=".ShowFiles"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NoAction"
             android:exported="false" />
         <activity
-            android:name=".User"
-            android:exported="true"
-            android:label="@string/title_activity_user"
-            android:theme="@style/Theme.NoAction" />
-        <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:theme="@style/Theme.NoAction"
+            android:screenOrientation="portrait"
+            android:exported="true"
+             />
+
+        <activity
+            android:name=".User"
+            android:screenOrientation="portrait"
+            android:exported="true"
+            android:theme="@style/Theme.NoAction">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
