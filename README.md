@@ -1,7 +1,7 @@
 # file_store
 ## Secure File Storage App Using Cryptography
-### We can upload the file into the database after encryption.
-### We can access our own files after downloading and decrypting it, but to access other's file we need decryption key.
+### Upload the file into the database after encrypting it.
+### Access your own files after downloading and decrypting it, but to access other's file we need decryption key.
 ## Login
 <img src="https://user-images.githubusercontent.com/84381731/187276589-6b3fcbe5-350c-46b7-9037-8bf52b4ecbff.jpg" width="250" height="500">
 Logout
